@@ -16,6 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ForgotPasswordEvent>(_onForgotPassword);
     on<GoogleLoginEvent>(_onGoogleLogin);
     on<ChangePasswordWithOTPEvent>(_onChangePasswordWithOTP);
+    on<LogoutEvent>(_onLogout);
   }
 
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
@@ -89,6 +90,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.cPassword,
       );
       emit(AuthSuccess('Password changed successfully'));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await _authRepository.logout();
+      emit(AuthInitial());
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }

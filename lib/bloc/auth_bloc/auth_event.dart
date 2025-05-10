@@ -56,3 +56,5 @@ class ChangePasswordWithOTPEvent extends AuthEvent {
     required this.cPassword,
   });
 }
+
+class LogoutEvent extends AuthEvent {}

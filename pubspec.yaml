@@ -45,10 +45,13 @@ dependencies:
   shared_preferences:
   fl_chart:
   google_nav_bar:
-  flutter_native_splash: ^2.4.4
   image_picker: ^1.1.2
   video_player: ^2.9.5
   share_handler:
+  http_parser: ^4.0.2
+  flutter_native_splash:
+  path:
+  receive_sharing_intent: ^1.8.1
 
 
 

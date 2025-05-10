@@ -27,6 +27,7 @@ class CreateCollectionDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () {
+            print('Create collection cancelled'); // Debug print
             Navigator.of(context).pop(); // Close the dialog
           },
           child: const Text('Cancel'),
@@ -35,10 +36,13 @@ class CreateCollectionDialog extends StatelessWidget {
           onPressed: () {
             final String collectionName = _nameController.text.trim();
             if (collectionName.isNotEmpty) {
+              print('Creating collection with name: $collectionName'); // Debug print
               // Dispatch the CreateCollection event
               context.read<CollectionBloc>().add(CreateCollection(collectionName));
+              print('CreateCollection event dispatched'); // Debug print
               Navigator.of(context).pop(); // Close the dialog
             } else {
+              print('Empty collection name entered'); // Debug print
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Please enter a valid name')),
               );

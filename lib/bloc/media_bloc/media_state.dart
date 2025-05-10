@@ -1,16 +1,28 @@
-part of 'media_bloc.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class MediaEvent extends Equatable {
-  const MediaEvent();
+abstract class MediaState extends Equatable {
+  const MediaState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-class CaptureImageEvent extends MediaEvent {}
+class MediaInitial extends MediaState {}
 
-class UploadImageEvent extends MediaEvent {}
+class MediaLoading extends MediaState {}
 
-class CaptureVideoEvent extends MediaEvent {}
+class MediaSuccess extends MediaState {
+  final Map<String, dynamic> response;
+  const MediaSuccess(this.response);
 
-class UploadVideoEvent extends MediaEvent {}
+  @override
+  List<Object?> get props => [response];
+}
+
+class MediaError extends MediaState {
+  final String message;
+  const MediaError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+} 

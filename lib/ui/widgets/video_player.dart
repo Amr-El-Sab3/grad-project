@@ -2,11 +2,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-
 class VideoPlayerWidget extends StatefulWidget {
-  final File videoFile;
-
-  const VideoPlayerWidget({required this.videoFile, super.key});
+  final String filePath;
+  const VideoPlayerWidget({Key? key, required this.filePath}) : super(key: key);
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -14,13 +12,18 @@ class VideoPlayerWidget extends StatefulWidget {
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
-  late Future<void> _initializeVideoPlayerFuture;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.file(widget.videoFile);
-    _initializeVideoPlayerFuture = _controller.initialize();
+    _controller = VideoPlayerController.file(File(widget.filePath))
+      ..initialize().then((_) {
+        setState(() {
+          _initialized = true;
+        });
+        _controller.play();
+      });
   }
 
   @override
@@ -31,17 +34,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _initializeVideoPlayerFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    if (!_initialized) {
+      return Center(child: CircularProgressIndicator());
+    }
+    return AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: VideoPlayer(_controller),
     );
-  }}
+  }
+}

@@ -15,7 +15,7 @@ class AuthService {
     if (response.statusCode == 200) {
       String token = jsonDecode(response.body)['token'];
       SharedPreferences prefsToken = await SharedPreferences.getInstance();
-      await prefsToken.setString('token', token); // Save token locally
+      await prefsToken.setString('user_token', token); // Changed from 'token' to 'user_token'
 
       print('Token saved successfully: $token'); // Debug log
       return token;
@@ -27,16 +27,18 @@ class AuthService {
 
   Future<bool> isUserLoggedIn() async {
     final SharedPreferences prefsToken = await SharedPreferences.getInstance();
-    return prefsToken.containsKey('token'); // Check if token exists
+    return prefsToken.containsKey('user_token'); // Changed from 'token' to 'user_token'
   }
 
   Future<void> logout() async {
     final SharedPreferences prefsToken = await SharedPreferences.getInstance();
-    await prefsToken.remove('token'); // Remove token on logout
+    
     final response = await http.post(Uri.parse('$_baseUrl/logout'));
+    
     if (response.statusCode != 200) {
       throw Exception('Failed to logout');
     }
+    await prefsToken.remove('user_token');
   }
 
   Future<void> register(String firstName, String lastName, String email,

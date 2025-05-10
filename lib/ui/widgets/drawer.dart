@@ -1,5 +1,7 @@
 import 'package:emotion_detection/ui/screens/records_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:emotion_detection/bloc/auth_bloc/auth_bloc.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -102,7 +104,30 @@ class _MyDrawerState extends State<MyDrawer> {
                 "LOGOUT",
                 style: TextStyle(color: Colors.redAccent),
               ),
-              onTap: () {},
+              onTap: () async {
+                final bloc = context.read<AuthBloc>();
+                bloc.add(LogoutEvent());
+                // Listen for logout completion and navigate
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(child: CircularProgressIndicator()),
+                );
+                // Wait for AuthInitial state
+                await for (final state in bloc.stream) {
+                  if (state is AuthInitial) {
+                    Navigator.of(context, rootNavigator: true).pop(); // Remove dialog
+                    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                    break;
+                  } else if (state is AuthFailure) {
+                    Navigator.of(context, rootNavigator: true).pop(); // Remove dialog
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(state.error)),
+                    );
+                    break;
+                  }
+                }
+              },
             ),
           ],
         ),

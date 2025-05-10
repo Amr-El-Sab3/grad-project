@@ -6,8 +6,28 @@ import '../models/collection_model.dart';
 class CollectionsService {
   final String _baseUrl = 'https://stiff-keslie-a7medbibars-f69765cc.koyeb.app';
 
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_token');
+  }
+
+  Future<Map<String, String>> _getHeaders() async {
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('No authentication token found. Please login first.');
+    }
+    return {
+      'Content-Type': 'application/json',
+      'token': token,
+    };
+  }
+
   Future<List<Collection>> fetchCollections() async {
-    final response = await http.get(Uri.parse('$_baseUrl/collections'));
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/collections'),
+      headers: headers,
+    );
 
     if (response.statusCode == 200) {
       Map<String, dynamic> jsonResponse = jsonDecode(response.body);
@@ -15,8 +35,7 @@ class CollectionsService {
         List<dynamic> jsonData = jsonResponse['data'];
         return jsonData.map((item) => Collection.fromJson(item)).toList();
       } else {
-        throw Exception(
-            'Failed to load collections: ${jsonResponse['message']}');
+        throw Exception('Failed to load collections: ${jsonResponse['message']}');
       }
     } else {
       throw Exception('Failed to load collections');
@@ -24,22 +43,10 @@ class CollectionsService {
   }
 
   Future<void> createCollection(String name) async {
-    final SharedPreferences prefsToken = await SharedPreferences.getInstance();
-     String? token = prefsToken.getString("token");
-
-    if (token == null || token.isEmpty) {
-      print('Token is missing or invalid'); // Debug log
-      throw Exception('Token is missing or invalid');
-    }
-
-    print('Retrieved token: $token'); // Debug log
-
+    final headers = await _getHeaders();
     final response = await http.post(
       Uri.parse('$_baseUrl/collections/create'),
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token,
-      },
+      headers: headers,
       body: jsonEncode({'name': name}),
     );
 
@@ -52,12 +59,17 @@ class CollectionsService {
   }
 
   Future<void> deleteCollection(String id) async {
+    final headers = await _getHeaders();
     final response = await http.delete(
       Uri.parse('$_baseUrl/collections/$id'),
+      headers: headers,
     );
 
+    print('Delete response status code: ${response.statusCode}'); // Debug log
+    print('Delete response body: ${response.body}'); // Debug log
+
     if (response.statusCode != 200) {
-      throw Exception('Failed to delete collection');
+      throw Exception('Failed to delete collection: ${response.body}');
     }
   }
 }
